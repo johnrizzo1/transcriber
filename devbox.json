@@ -1,0 +1,27 @@
+{
+  "packages": [
+    "python@3.10",
+    "portaudio@latest",
+    "pkg-config@latest",
+    "poetry@latest",
+    "ffmpeg@latest"
+  ],
+  "shell": {
+    "init_hook": [
+      "echo 'Setting up Transcriber AI Voice Agent development environment...'",
+      "poetry install",
+      "echo 'Environment ready! Run: poetry run transcriber --help'"
+    ],
+    "scripts": {
+      "install": "poetry install",
+      "dev": "poetry run transcriber",
+      "test": "pytest",
+      "lint": "ruff check .",
+      "format": "ruff format ."
+    }
+  },
+  "env": {
+    "PYTHONPATH": ".",
+    "PYTHONUNBUFFERED": "1"
+  }
+}

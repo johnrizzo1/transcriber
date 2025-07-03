@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls:*)",
+      "Bash(mkdir:*)",
+      "Bash(devbox shell:*)",
+      "Bash(pip install:*)",
+      "Bash(python:*)",
+      "Bash(ollama:*)",
+      "Bash(touch:*)"
+    ],
+    "deny": []
+  }
+}

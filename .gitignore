@@ -1,0 +1,46 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv
+
+# Development
+.env
+.env.local
+*.log
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Testing
+.coverage
+.pytest_cache/
+htmlcov/
+.tox/
+.mypy_cache/
+.ruff_cache/
+
+# Build
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Project specific
+*.db
+*.sqlite
+recordings/
+sessions/
+models/
+conversations/
+temp/
+
+# Node modules (if any frontend is added later)
+node_modules/
