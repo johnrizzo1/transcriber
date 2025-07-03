@@ -90,6 +90,37 @@ class PerformanceConfig(BaseModel):
     }
 
 
+class MemoryConfig(BaseModel):
+    """Vector memory configuration for persistent context."""
+    enabled: bool = True
+    chromadb_path: str = "./data/memory"
+    collection_name: str = "transcriber_memory"
+    
+    # Embedding configuration
+    embedding_strategy: str = "sentence_transformers"
+    embedding_model: str = "all-MiniLM-L6-v2"
+    
+    # Context retrieval settings
+    max_context_memories: int = 5
+    similarity_threshold: float = 0.7
+    context_window_days: int = 30  # Only consider memories from last N days
+    
+    # Performance optimization
+    lazy_initialization: bool = True
+    background_processing: bool = True
+    embedding_cache_size: int = 1000
+    
+    # Memory lifecycle
+    memory_retention_days: int = 365
+    auto_cleanup_enabled: bool = True
+    cleanup_interval_hours: int = 24
+    
+    # Privacy controls
+    exclude_sensitive_patterns: list[str] = [
+        "password", "secret", "token", "key"
+    ]
+
+
 class Settings(BaseSettings):
     """Main application settings."""
     
@@ -113,6 +144,9 @@ class Settings(BaseSettings):
     
     # Performance monitoring settings
     performance: PerformanceConfig = PerformanceConfig()
+    
+    # Memory system settings
+    memory: MemoryConfig = MemoryConfig()
     
     # Edge TTS voice selection
     edge_voice: str = "en-US-AriaNeural"  # Default to Aria (female, US)

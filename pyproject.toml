@@ -40,6 +40,10 @@ gtts = "^2.5.0"  # Google Text-to-Speech (simple, cloud-based)
 faster-whisper = "^1.0.0"  # Fast Whisper implementation for STT
 pydub = "^0.25.1"  # For audio format conversion
 
+# Vector database and embeddings for memory system
+chromadb = "^0.4.0"  # Local vector database
+sentence-transformers = "^2.2.0"  # Local embedding generation
+
 # Optional: Additional options (uncomment if needed)
 # openai-whisper = "^20231117"  # Official OpenAI Whisper (requires PyTorch)
 edge-tts = "^6.1.0"  # Microsoft Edge TTS (better audio output)

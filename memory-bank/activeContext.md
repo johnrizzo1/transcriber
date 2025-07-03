@@ -2,8 +2,8 @@
 
 ## Current Development Focus
 
-### Project Status: **Phase 8 Complete - Performance Optimization System Implemented**
-The core voice agent pipeline is **fully functional** with complete session management and comprehensive performance optimization system. Ready for tool system implementation and enhanced CLI features.
+### Project Status: **Phase 8 Complete - Ready for Query Command with Vector Memory**
+The core voice agent pipeline is **fully functional** with complete session management and comprehensive performance optimization system. **NEW PRIORITY**: Implementation of query command with ChromaDB-based vector memory for persistent context across invocations.
 
 ### What's Working Now ✅
 - **Complete Voice Pipeline**: Audio capture → VAD → STT → Agent → TTS → Output
@@ -28,19 +28,28 @@ The core voice agent pipeline is **fully functional** with complete session mana
 
 ### Immediate Next Steps
 
-#### 1. Tool System Implementation (Phase 5)
+#### 1. Query Command with Vector Memory (NEW PRIORITY)
+**Priority**: HIGHEST - User-requested feature ready for implementation
+- **Goal**: `poetry run transcriber query "What tools do you have access to?"`
+- **Memory**: Persistent context using ChromaDB vector database
+- **Example**: Store "My name is John Rizzo" → Later retrieve with "What is my name?"
+- **Implementation Plan**: [`docs/QUERY_COMMAND_IMPLEMENTATION_PLAN.md`](../docs/QUERY_COMMAND_IMPLEMENTATION_PLAN.md)
+- **Timeline**: 4 weeks, phased development approach
+- **Status**: Architecture complete, ready to begin Phase 1 implementation
+
+#### 2. Tool System Implementation (Phase 5)
 **Priority**: HIGH - Foundation exists, needs activation
 - Tool registry is implemented but needs built-in tools
 - Base tool interface exists in [`transcriber/tools/base.py`](transcriber/tools/base.py)
 - Built-in tool categories ready: System, Development, Information, Productivity
 
-#### 2. Enhanced CLI Commands (Phase 7)
+#### 3. Enhanced CLI Commands (Phase 7)
 **Priority**: MEDIUM - Basic functionality works
 - Implement `list-tools` command
 - Add session replay functionality
 - Create export capabilities
 
-#### 3. Testing & Documentation (Phase 9)
+#### 4. Testing & Documentation (Phase 9)
 **Priority**: MEDIUM - Foundation exists, needs expansion
 - Comprehensive test suite for all components
 - Performance testing and benchmarking

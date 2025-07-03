@@ -44,3 +44,6 @@ temp/
 
 # Node modules (if any frontend is added later)
 node_modules/
+
+# My application generated data
+data/

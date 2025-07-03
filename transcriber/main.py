@@ -978,6 +978,221 @@ def profile(
 
 
 @app.command()
+def query(
+    message: str = typer.Argument(
+        ..., help="Query message to send to the agent"
+    ),
+    model: str = typer.Option(
+        "llama3.2:3b", "--model", "-m", help="Ollama model to use"
+    ),
+    memory: bool = typer.Option(
+        True, "--memory/--no-memory", help="Enable memory context retrieval"
+    ),
+    verbose: bool = typer.Option(
+        False, "--verbose", "-v", help="Show memory context and metadata"
+    ),
+    store: bool = typer.Option(
+        True, "--store/--no-store", help="Store this interaction in memory"
+    ),
+):
+    """Send a single query to the agent with persistent memory."""
+    import asyncio
+    import json
+    from .agent.query_agent import QueryAgent
+    from .config import settings
+    from rich.panel import Panel
+    from rich.syntax import Syntax
+
+    async def process_query_async():
+        # Update model setting
+        settings.agent.model = model
+
+        # Create and initialize query agent
+        query_agent = QueryAgent(settings)
+
+        try:
+            # Show processing indicator
+            if verbose:
+                console.print(
+                    f"[cyan]Processing query with model:[/cyan] {model}"
+                )
+                console.print(f"[cyan]Memory enabled:[/cyan] {memory}")
+
+            # Process the query
+            result = await query_agent.process_query(
+                query=message,
+                use_memory=memory,
+                store_interaction=store,
+                verbose=verbose
+            )
+
+            # Display results
+            if result.error:
+                console.print(f"[red]Error:[/red] {result.error}")
+                return
+
+            # Show memory context if verbose and available
+            if (verbose and result.memory_context and
+                    result.memory_context.has_relevant_context()):
+                context_panel = Panel(
+                    result.memory_context.get_context_text(),
+                    title="[yellow]Memory Context Used[/yellow]",
+                    border_style="yellow"
+                )
+                console.print(context_panel)
+                console.print()
+
+            # Show main response
+            response_panel = Panel(
+                result.response,
+                title="[green]Agent Response[/green]",
+                border_style="green"
+            )
+            console.print(response_panel)
+
+            # Show metadata if verbose
+            if verbose:
+                metadata = {
+                    "processing_time": f"{result.processing_time:.2f}s",
+                    "memory_context_used": result.memory_context is not None,
+                    "relevant_memories": (
+                        len(result.memory_context.relevant_memories)
+                        if result.memory_context else 0
+                    )
+                }
+
+                metadata_text = json.dumps(metadata, indent=2)
+                metadata_panel = Panel(
+                    Syntax(metadata_text, "json", theme="monokai"),
+                    title="[blue]Processing Metadata[/blue]",
+                    border_style="blue"
+                )
+                console.print(metadata_panel)
+
+        finally:
+            await query_agent.cleanup()
+
+    # Run the async query processing
+    asyncio.run(process_query_async())
+
+
+@app.command()
+def memory_stats():
+    """Show memory system statistics and status."""
+    import asyncio
+    from .memory import MemoryManager
+    from .config import settings
+    from rich.table import Table
+
+    async def show_memory_stats():
+        if not settings.memory.enabled:
+            console.print("[yellow]Memory system is disabled[/yellow]")
+            return
+
+        memory_manager = MemoryManager(settings.memory)
+
+        try:
+            stats = await memory_manager.get_memory_statistics()
+
+            # Create statistics table
+            table = Table(title="Memory System Statistics")
+            table.add_column("Metric", style="cyan")
+            table.add_column("Value", style="white")
+
+            table.add_row(
+                "Status",
+                "✅ Enabled" if stats.get("enabled") else "❌ Disabled"
+            )
+            table.add_row(
+                "Total Memories",
+                str(stats.get("total_memories", "Unknown"))
+            )
+            table.add_row(
+                "Embedding Model",
+                stats.get("embedding_model", "Unknown")
+            )
+            table.add_row(
+                "Embedding Strategy",
+                stats.get("embedding_strategy", "Unknown")
+            )
+            table.add_row(
+                "Cache Size",
+                str(stats.get("cache_size", "Unknown"))
+            )
+            table.add_row(
+                "Storage Path",
+                stats.get("storage_path", "Unknown")
+            )
+
+            console.print(table)
+
+            if stats.get("error"):
+                console.print(f"[red]Error:[/red] {stats['error']}")
+
+        finally:
+            await memory_manager.close()
+
+    asyncio.run(show_memory_stats())
+
+
+@app.command()
+def memory_cleanup(
+    days: int = typer.Option(
+        30, "--days", "-d",
+        help="Delete memories older than this many days"
+    ),
+    confirm: bool = typer.Option(
+        False, "--confirm", "-y", help="Skip confirmation prompt"
+    ),
+):
+    """Clean up old memories from the vector database."""
+    import asyncio
+    from .memory import MemoryManager
+    from .config import settings
+
+    async def cleanup_memories():
+        if not settings.memory.enabled:
+            console.print("[yellow]Memory system is disabled[/yellow]")
+            return
+
+        if not confirm:
+            response = typer.confirm(
+                f"This will delete all memories older than {days} days. "
+                "Continue?"
+            )
+            if not response:
+                console.print("Cleanup cancelled")
+                return
+
+        memory_manager = MemoryManager(settings.memory)
+
+        try:
+            console.print(
+                f"[cyan]Cleaning up memories older than {days} days..."
+                "[/cyan]"
+            )
+            deleted_count = await memory_manager.cleanup_old_memories(days)
+
+            if deleted_count > 0:
+                console.print(
+                    f"[green]Successfully deleted {deleted_count} old "
+                    "memories[/green]"
+                )
+            else:
+                console.print(
+                    "[yellow]No old memories found to delete[/yellow]"
+                )
+
+        except Exception as e:
+            console.print(f"[red]Cleanup failed:[/red] {e}")
+
+        finally:
+            await memory_manager.close()
+
+    asyncio.run(cleanup_memories())
+
+
+@app.command()
 def performance(
     show_live: bool = typer.Option(
         False, "--live", "-l", help="Show live performance metrics"
